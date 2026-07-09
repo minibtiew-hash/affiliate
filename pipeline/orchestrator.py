@@ -1,6 +1,6 @@
 import os
 
-from pipeline import ffmpeg_utils, image_gen, video_gen
+from pipeline import ffmpeg_utils, image_gen, storage, video_gen
 
 
 def generate_video_from_product(product_config: dict) -> str:
@@ -72,31 +72,40 @@ def generate_video_from_product(product_config: dict) -> str:
         output_path=os.path.join(out_dir, "clip4.mp4"),
     )
 
+    # Kling needs a reachable URL, not a local path — upload beat 2 & 3 first.
+    beat2_url = storage.upload_file(beat2_image, dest_blob_name=f"{product_config['name']}/beat2.png")
+    beat3_url = storage.upload_file(beat3_image, dest_blob_name=f"{product_config['name']}/beat3.png")
+
     # Beats 2 & 3: Kling image2video at 5s, then trim to the beat's target duration.
     beat2_raw_url = video_gen.generate_video(
-        image_path_or_url=beat2_image,
+        image_path_or_url=beat2_url,
         prompt=beats["2"]["kling_prompt"],
         negative_prompt=beats["2"].get("kling_negative_prompt", ""),
         camera_params=beats["2"].get("camera_params"),
     )
     beat3_raw_url = video_gen.generate_video(
-        image_path_or_url=beat3_image,
+        image_path_or_url=beat3_url,
         prompt=beats["3"]["kling_prompt"],
         negative_prompt=beats["3"].get("kling_negative_prompt", ""),
         camera_params=beats["3"].get("camera_params"),
     )
 
-    # NOTE: generate_video returns a remote URL — download step needed before
-    # trim_clip can operate on it locally. Left as a follow-up once the live
-    # Kling response shape is confirmed (download_url helper TBD).
+    # generate_video returns a remote URL — download locally before trimming.
+    beat2_raw_local = storage.download_file(
+        beat2_raw_url, os.path.join(out_dir, "beat2_raw_5s.mp4")
+    )
+    beat3_raw_local = storage.download_file(
+        beat3_raw_url, os.path.join(out_dir, "beat3_raw_5s.mp4")
+    )
+
     clip2 = ffmpeg_utils.trim_clip(
-        input_path=beat2_raw_url,
+        input_path=beat2_raw_local,
         start=beats["2"].get("trim_start", 0),
         duration=beats["2"]["trim_duration"],
         output_path=os.path.join(out_dir, "clip2.mp4"),
     )
     clip3 = ffmpeg_utils.trim_clip(
-        input_path=beat3_raw_url,
+        input_path=beat3_raw_local,
         start=beats["3"].get("trim_start", 0),
         duration=beats["3"]["trim_duration"],
         output_path=os.path.join(out_dir, "clip3.mp4"),
