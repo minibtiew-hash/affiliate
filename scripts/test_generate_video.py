@@ -5,6 +5,12 @@ have produced output/alpha_borong_switch/beat2.png. Requires KLING_API_KEY
 and GCS credentials (GCS_BUCKET_NAME, GOOGLE_APPLICATION_CREDENTIALS) in
 .env — the local PNG is uploaded to GCS first since Kling needs a reachable
 URL, not a local path.
+
+Uses mode="std" instead of the pipeline's default "pro" for this first
+quality check — same kling-v2-6 model generation, ~40% cheaper per second
+($0.042/s vs $0.07/s), so the result is still representative of what we'd
+actually deploy. Once quality is confirmed, production runs can switch back
+to "pro" for better motion consistency.
 """
 from products.alpha_borong_switch import PRODUCT_CONFIG
 
@@ -25,5 +31,6 @@ if __name__ == "__main__":
         prompt=beat2["kling_prompt"],
         negative_prompt=beat2["kling_negative_prompt"],
         camera_params=beat2["camera_params"],
+        mode="std",
     )
     print(f"Raw 5s clip URL: {clip_url}")

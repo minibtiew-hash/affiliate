@@ -2,6 +2,10 @@ import json
 import os
 from datetime import datetime, timezone
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 LOG_PATH = os.path.join("costs", "usage_log.jsonl")
 
 # Gemini image pricing per the handoff brief: ~$0.045-$0.055/image, provider-
@@ -9,11 +13,20 @@ LOG_PATH = os.path.join("costs", "usage_log.jsonl")
 # real figure from your billing page once you have one.
 GEMINI_IMAGE_COST_USD = float(os.environ.get("GEMINI_IMAGE_COST_USD", "0.05"))
 
-# Kling has no sticker price in the brief (only "budget ~1.4x for rerolls").
-# Cost stays unknown/unlogged until you set this from your actual billing
-# page — better to say "unknown" than to silently guess wrong.
-_kling_env = os.environ.get("KLING_COST_PER_SECOND_USD")
-KLING_COST_PER_SECOND_USD = float(_kling_env) if _kling_env else None
+# Kling pricing confirmed 2026-07-09 from the official pricing page
+# (kling-v2-6): pro mode $0.07/s, std mode $0.042/s. Rate depends on which
+# mode a given call actually used, not just the model — cost is unknown
+# until the matching env var is set, rather than silently guessing.
+_kling_pro_env = os.environ.get("KLING_COST_PER_SECOND_USD_PRO")
+KLING_COST_PER_SECOND_USD_PRO = float(_kling_pro_env) if _kling_pro_env else None
+
+_kling_std_env = os.environ.get("KLING_COST_PER_SECOND_USD_STD")
+KLING_COST_PER_SECOND_USD_STD = float(_kling_std_env) if _kling_std_env else None
+
+_KLING_RATES_BY_MODE = {
+    "pro": KLING_COST_PER_SECOND_USD_PRO,
+    "std": KLING_COST_PER_SECOND_USD_STD,
+}
 
 
 def _append(entry: dict) -> dict:
@@ -39,24 +52,27 @@ def log_image_call(model: str, count: int = 1) -> dict:
     return entry
 
 
-def log_video_call(model: str, seconds: float) -> dict:
-    if KLING_COST_PER_SECOND_USD is None:
+def log_video_call(model: str, seconds: float, mode: str = "pro") -> dict:
+    rate = _KLING_RATES_BY_MODE.get(mode)
+    if rate is None:
         entry = _append(
             {
                 "type": "video",
                 "model": model,
+                "mode": mode,
                 "units_seconds": seconds,
                 "estimated_cost_usd": None,
-                "note": "KLING_COST_PER_SECOND_USD not set - cost unknown. "
-                "Set it in .env from your Kling billing page.",
+                "note": f"KLING_COST_PER_SECOND_USD_{mode.upper()} not set - "
+                "cost unknown. Set it in .env from Kling's pricing page.",
             }
         )
     else:
-        cost = round(KLING_COST_PER_SECOND_USD * seconds, 4)
+        cost = round(rate * seconds, 4)
         entry = _append(
             {
                 "type": "video",
                 "model": model,
+                "mode": mode,
                 "units_seconds": seconds,
                 "estimated_cost_usd": cost,
                 "cost_is_estimate": True,
