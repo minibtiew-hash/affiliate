@@ -5,7 +5,24 @@ This spec defines what to generate at the **image stage**, so that each image al
 
 ---
 
-## Pipeline Overview
+## ⚠️ 2026-07-09 update — beat structure revised (supersedes durations/animation assignment below)
+
+User decision, applied to the `alpha_borong_switch` product config and the orchestrator:
+
+| Beat | Animation | Duration | Text overlay |
+|---|---|---|---|
+| 1. Hook | **Kling** (was local) | 3s | Yes — POV line, upper-third |
+| 2. Product Reveal | **Local zoom/pan** (was Kling) | 1s | Yes, light — product name, lower-third |
+| 3. Proof/Demo | Kling (unchanged) | 3s | Yes — short "how to use" line (was "none ideally") |
+| 4. CTA Close | Local zoom/pan (unchanged) | 1s | Yes, bold — NOT "buy now"/price, a benefit line instead (e.g. "don't need to stand up again"), lower-third |
+
+**Total target ~8s, not the full 10s** — reasoning: shorter clips hold attention better, viewers are "lazy to watch." Still only 2 Kling calls per video (beats 1 & 3 now, was 2 & 3), so the cost-optimization intent from the original brief is preserved, just reassigned.
+
+Text overlays are burned in via `ffmpeg`'s `drawtext` filter (`pipeline/ffmpeg_utils.py: add_text_overlay`) — no paid API, reuses the existing local toolchain. All 4 beats now carry overlay text (beat 3 flips from the original "no text" guidance since the user wants a short instructional line there).
+
+---
+
+## Pipeline Overview (original — see table above for current assignment)
 
 ```
 [Image 1: Hook]  → animate → [Clip 1: ~1.5-2s]

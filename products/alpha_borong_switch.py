@@ -131,6 +131,14 @@ BEAT4_NEGATIVE_PROMPT = (
     "resolution, busy background"
 )
 
+    # 2026-07-09 restructure (user decision): total video target ~8s, not the
+    # full 10s allowed — beat 1 now gets real Kling animation (hand straining
+    # to reach the switch reads better animated than static), beat 2 drops to
+    # local zoom/pan only (reveal doesn't need motion at 1s). Beat 3 stays
+    # Kling, beat 4 stays local. Still 2 Kling calls per video, just swapped.
+    # overlay_text values are DRAFTS reflecting the user's direction, not
+    # approved final ad copy — confirm exact wording before shipping.
+
 PRODUCT_CONFIG = {
     "name": "alpha_borong_switch",
     "output_dir": "output/alpha_borong_switch",
@@ -139,20 +147,27 @@ PRODUCT_CONFIG = {
         "1": {
             "prompt": BEAT1_PROMPT,
             "negative_prompt": BEAT1_NEGATIVE_PROMPT,
-            "duration": 1.8,
-            "zoom_direction": "in",
+            "kling_prompt": (
+                "The hand and arm slowly stretch further out from under the "
+                "blanket, straining toward the switch, natural subtle "
+                "handheld phone-camera drift"
+            ),
+            "kling_negative_prompt": (
+                "fast zoom, spin, camera shake, motion blur, jump cut"
+            ),
+            "camera_params": {},
+            "trim_start": 0,
+            "trim_duration": 3.0,
+            "overlay_text": "POV: too lazy to get up and turn off the light",
+            "overlay_zone": "upper_third",
         },
         "2": {
             "prompt": BEAT2_PROMPT,
             "negative_prompt": BEAT2_NEGATIVE_PROMPT,
-            "kling_prompt": (
-                "Hand slowly rotates the device toward camera, revealing its "
-                "full shape"
-            ),
-            "kling_negative_prompt": "fast zoom, spin, motion blur, shaky camera",
-            "camera_params": {},
-            "trim_start": 0,
-            "trim_duration": 2.3,
+            "duration": 1.0,
+            "zoom_direction": "in",
+            "overlay_text": "Alpha Borong Wireless Switch",
+            "overlay_zone": "lower_third_light",
         },
         "3": {
             "prompt": BEAT3_PROMPT,
@@ -167,13 +182,17 @@ PRODUCT_CONFIG = {
             ),
             "camera_params": {},
             "trim_start": 0,
-            "trim_duration": 2.8,
+            "trim_duration": 3.0,
+            "overlay_text": "Just tap once",
+            "overlay_zone": "upper_third",
         },
         "4": {
             "prompt": BEAT4_PROMPT,
             "negative_prompt": BEAT4_NEGATIVE_PROMPT,
-            "duration": 1.8,
+            "duration": 1.0,
             "zoom_direction": "in",
+            "overlay_text": "Don't need to stand up again",
+            "overlay_zone": "lower_third_bold",
         },
     },
 }
