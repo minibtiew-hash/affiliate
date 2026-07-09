@@ -64,8 +64,10 @@ def generate_video(
 
     deadline = time.time() + timeout
     while time.time() < deadline:
+        # Not /v1/videos/{task_id} as the brief's docs stated (404s) - the
+        # real path nests under the endpoint name, confirmed live 2026-07-09.
         poll = requests.get(
-            f"{config.KLING_BASE_URL}/v1/videos/{task_id}",
+            f"{config.KLING_BASE_URL}/v1/videos/image2video/{task_id}",
             headers=headers,
             timeout=30,
         )
