@@ -69,8 +69,8 @@ This is the master tracker for the project. Update status as we complete each st
 ### Known gaps / unverified assumptions in the current code (flag before relying on it)
 - ~~`aspect_ratio` parameter placement was a guess~~ — **fixed 2026-07-09**: `generation_config.image_config.aspect_ratio` is deprecated in the installed SDK; the working path is `response_format={"type": "image", "aspect_ratio": ..., "image_size": "1K"}`, passed directly to `client.interactions.create()`. Confirmed live: reference-based generations were drifting to a different resolution (848x1264 vs 768x1376) before this fix, now consistent across all 4 beats.
 - `video_gen.py` assumes a simple `Authorization: Bearer <token>` auth scheme per the brief; some Kling accounts use JWT-based auth instead — verify against your actual account's docs
-- ~~orchestrator's beat 2/3 flow needed an upload-before-Kling and download-before-trim step~~ — **fixed 2026-07-09**: wired through `pipeline/storage.py` (GCS). Not yet tested live — needs `GCS_BUCKET_NAME` + `GOOGLE_APPLICATION_CREDENTIALS`.
-- `storage.upload_file()` uses `blob.generate_signed_url()`, which requires a service account key capable of signing (not plain user ADC from `gcloud auth login`) — flagged in `.env.example`, unverified until we have real credentials to test against
+- ~~orchestrator's beat 2/3 flow needed an upload-before-Kling and download-before-trim step~~ — **fixed 2026-07-09**: wired through `pipeline/storage.py` (GCS)
+- ~~`storage.upload_file()` signed-URL generation unverified~~ — **confirmed working live 2026-07-09**: bucket `mike-affiliate-video-assets` + service account credentials tested end-to-end (upload → signed URL → HTTP 200 fetch, content-length matched). All 3 API integrations (Gemini, Kling key set, GCS) now have working credentials.
 
 ---
 

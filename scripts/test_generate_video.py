@@ -1,18 +1,24 @@
-"""Standalone test: animate the Fingerbot beat 2 image via Kling.
+"""Standalone test: animate the Alpha Borong beat 2 image via Kling.
 
-Per MASTER-TODO.md immediate next step #6 — run only after
-test_generate_image.py has produced output/fingerbot/beat2_test.png.
-Requires KLING_API_KEY in .env, and an image URL Kling can fetch (upload the
-local PNG to a CDN/bucket first — Kling's `image` field needs a reachable
-URL or base64, not a local path).
+Run only after test_generate_image.py / test_generate_remaining_beats.py
+have produced output/alpha_borong_switch/beat2.png. Requires KLING_API_KEY
+and GCS credentials (GCS_BUCKET_NAME, GOOGLE_APPLICATION_CREDENTIALS) in
+.env — the local PNG is uploaded to GCS first since Kling needs a reachable
+URL, not a local path.
 """
-from products.fingerbot import PRODUCT_CONFIG
+from products.alpha_borong_switch import PRODUCT_CONFIG
 
+from pipeline import storage
 from pipeline.video_gen import generate_video
 
 if __name__ == "__main__":
     beat2 = PRODUCT_CONFIG["beats"]["2"]
-    image_url = "REPLACE_WITH_UPLOADED_BEAT2_IMAGE_URL"
+    local_image = f"{PRODUCT_CONFIG['output_dir']}/beat2.png"
+
+    image_url = storage.upload_file(
+        local_image, dest_blob_name=f"{PRODUCT_CONFIG['name']}/beat2.png"
+    )
+    print(f"Uploaded to: {image_url}")
 
     clip_url = generate_video(
         image_path_or_url=image_url,
