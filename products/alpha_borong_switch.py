@@ -1,10 +1,21 @@
-"""Test case product config — ADAPROX Fingerbot smart switch-pusher.
+"""Product config — Alpha Borong Wireless Remote-Control Switch / Smart
+Light Controller (real Shopee listing, confirmed via screenshot 2026-07-09
+after the original "ADAPROX Fingerbot" name from the handoff brief turned
+out to be a placeholder, not the actual product).
 
-All 4 beat prompts are drafted. Beat 2 comes verbatim from the handoff
-brief; beats 1, 3, and 4 were written to match its established look (same
-bedroom, same white light switch, same left-side window light, same
-light-medium skin tone) so the 4 images hold together as one consistent set
-per the cross-cutting requirements in image-generation-animation-requirements.md.
+Real product facts (from listing screenshot): white switch-cover panel with
+a mechanical arm that physically presses an existing wall light switch, a
+separate wireless receiver cube (USB-powered), and a handheld ON/OFF remote
+control. Selling points: long battery life, wireless convenience, no need
+to drill holes.
+
+All 4 beat prompts are drafted. Beats 1-3 keep the mechanical-arm visual
+concept from the original draft (still accurate to the real product) but
+beat 4's packaging text has been corrected from the placeholder brand to
+Alpha Borong, and now includes the remote control since that's a real
+differentiator for this listing. Same bedroom, same white light switch,
+same left-side window light, same light-medium skin tone across all 4 for
+consistency per image-generation-animation-requirements.md.
 """
 
 BEAT1_PROMPT = (
@@ -30,8 +41,8 @@ BEAT1_NEGATIVE_PROMPT = (
 )
 
 BEAT2_PROMPT = (
-    'A close-up UGC-style photo of a hand holding a small white smart home '
-    'device called a "Fingerbot" — a compact rectangular white plastic '
+    "A close-up UGC-style photo of a hand holding a small white wireless "
+    "smart switch-pusher device — a compact rectangular white plastic "
     "gadget roughly the size of a matchbox, with a small mechanical arm on "
     "one side. The hand holds it at chest height, fingers wrapping naturally "
     "around the sides, thumb visible, product tilted slightly toward camera "
@@ -53,16 +64,16 @@ BEAT2_NEGATIVE_PROMPT = (
 
 BEAT3_PROMPT = (
     "A close-up UGC-style vertical photo, tighter framing than a standard "
-    "product shot, showing the white Fingerbot device mounted directly on "
-    "top of a wall light switch, its small mechanical arm extended "
-    "downward mid-press, physically pushing the switch toggle at the exact "
-    "moment of activation. A sliver of the same softly blurred bedroom "
-    "wall is visible around the switch. In the background, subtly out of "
-    "focus, a bedside lamp is visibly lit, making the cause-and-effect "
-    "obvious even as a still frame. Natural window lighting from the "
-    "left, same direction and softness as the rest of this set, soft "
-    "shadows, no harsh studio lighting. Product and switch in sharp "
-    "focus, mechanical arm clearly mid-motion. Shot vertically, "
+    "product shot, showing the white wireless switch-pusher device mounted "
+    "directly on top of a wall light switch, its small mechanical arm "
+    "extended downward mid-press, physically pushing the switch toggle at "
+    "the exact moment of activation. A sliver of the same softly blurred "
+    "bedroom wall is visible around the switch. In the background, subtly "
+    "out of focus, a bedside lamp is visibly lit, making the "
+    "cause-and-effect obvious even as a still frame. Natural window "
+    "lighting from the left, same direction and softness as the rest of "
+    "this set, soft shadows, no harsh studio lighting. Product and switch "
+    "in sharp focus, mechanical arm clearly mid-motion. Shot vertically, "
     "phone-camera aesthetic, slightly candid angle. No hand or face in "
     "frame — device caught mid-action on its own."
 )
@@ -74,21 +85,23 @@ BEAT3_NEGATIVE_PROMPT = (
 )
 
 BEAT4_PROMPT = (
-    "A bright, clean, well-exposed vertical product photo of the Fingerbot "
-    'device sitting next to its retail packaging box (small white box with '
-    '"ADAPROX Fingerbot" branding clearly legible) on a nightstand in the '
-    "same bedroom setting as the rest of this set. Device and box both in "
-    "sharp focus, product occupying the upper two-thirds of frame, "
+    "A bright, clean, well-exposed vertical product photo of the white "
+    "wireless switch-pusher device sitting next to its small handheld "
+    "remote control (a simple gray remote with ON and OFF buttons) and its "
+    'retail packaging box (small white box with "Alpha Borong" branding '
+    "clearly legible) on a nightstand in the same bedroom setting as the "
+    "rest of this set. Device, remote, and box all in sharp focus, "
+    "arranged neatly, product occupying the upper two-thirds of frame, "
     "centered. The bottom third of the vertical frame is left clear, "
     "evenly lit and uncluttered, reserved for bold price/offer text "
     "overlay. Lighting is bright and even — natural window light from the "
     "left, same direction as the rest of the set, but brighter and more "
     "evenly diffused than the earlier candid shots, giving a more "
     'polished "product shot" credibility to this final frame. No dark '
-    "corners, no shadows obscuring the product or box. Shot vertically, "
-    "phone-camera aesthetic but cleaner and more deliberate than the hook "
-    "shot. No hand or face needed in this shot — product and packaging "
-    "only."
+    "corners, no shadows obscuring the product, remote, or box. Shot "
+    "vertically, phone-camera aesthetic but cleaner and more deliberate "
+    "than the hook shot. No hand or face needed in this shot — product, "
+    "remote, and packaging only."
 )
 
 BEAT4_NEGATIVE_PROMPT = (
@@ -98,8 +111,8 @@ BEAT4_NEGATIVE_PROMPT = (
 )
 
 PRODUCT_CONFIG = {
-    "name": "fingerbot",
-    "output_dir": "output/fingerbot",
+    "name": "alpha_borong_switch",
+    "output_dir": "output/alpha_borong_switch",
     "product_asset_path": None,
     "beats": {
         "1": {
