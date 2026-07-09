@@ -63,7 +63,7 @@ This is the master tracker for the project. Update status as we complete each st
 `pipeline/cost_tracker.py` logs every image/video API call to `costs/usage_log.jsonl` (local, gitignored) and prints cost + running total to console on each call.
 
 - **Image cost (Nano Banana 2):** defaulted to $0.05/image (midpoint of the brief's $0.045-$0.055 estimate). Override with `GEMINI_IMAGE_COST_USD` in `.env` once real billing data is available.
-- **Video cost (Kling):** **unset by default** — the brief gives no sticker price, only a "budget ~1.4x for rerolls" note. Cost will log as `unknown` until `KLING_COST_PER_SECOND_USD` is set in `.env` from your actual Kling billing page. Don't trust a guessed number here.
+- **Video cost (Kling):** **confirmed 2026-07-09** from the official pricing page (`kling.ai/document-api/pricing/base/video`, screenshot provided by user) — `kling-v2-6`, pro mode, no native audio = **$0.07/second**, so a standard 5s generation = **$0.35**. Set as `KLING_COST_PER_SECOND_USD=0.07` in `.env`. `video_gen.py` now explicitly sends `sound="off"` so the real API call matches this pricing tier. With native audio (component #9, not yet built) this roughly doubles: $0.14/s (no voice control) or $0.168/s (with voice control).
 - Kling cost is logged at job submission (not completion) since failed/rerolled jobs can still burn credits per the brief.
 - Running total so far: **$0.50** (10 test images generated, 2026-07-09 — includes debugging/regeneration overhead while fixing the aspect-ratio and lighting bugs, not just the final 4-image set)
 

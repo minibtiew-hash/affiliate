@@ -15,6 +15,7 @@ def generate_video(
     camera_params: dict | None = None,
     duration: str = "5",
     mode: str = "pro",
+    sound: str = "off",
     poll_interval: int = 5,
     timeout: int = 600,
 ) -> str:
@@ -22,6 +23,11 @@ def generate_video(
 
     duration must stay "5" (Kling's minimum) — trimming to the beat's real
     target length happens afterwards via ffmpeg_utils.trim_clip.
+
+    sound="off" (no native audio) matches the confirmed pricing tier this
+    pipeline budgets for ($0.07/s, kling-v2-6 pro mode) — flip to "on" only
+    once component #9 (audio) is actually being built, since native audio
+    roughly doubles the per-second cost.
     """
     api_key = config.require_kling_key()
     headers = {"Authorization": f"Bearer {api_key}"}
@@ -33,6 +39,7 @@ def generate_video(
         "negative_prompt": negative_prompt,
         "duration": duration,
         "mode": mode,
+        "sound": sound,
     }
     if image_tail:
         body["image_tail"] = image_tail
