@@ -25,8 +25,6 @@ def generate_image(
     if negative_prompt:
         full_prompt += f"\n\nAvoid: {negative_prompt}"
 
-    # TODO: confirm exact aspect_ratio parameter name/placement once the
-    # live API response is inspected — the brief flags this as unverified.
     input_content = [{"type": "text", "text": full_prompt}]
     for ref_path in reference_images or []:
         with open(ref_path, "rb") as f:
@@ -39,9 +37,16 @@ def generate_image(
             }
         )
 
+    # generation_config.image_config.aspect_ratio is deprecated in this SDK
+    # version — the live path is response_format={"type": "image", ...}.
     interaction = client.interactions.create(
         model=config.GEMINI_MODEL,
         input=input_content,
+        response_format={
+            "type": "image",
+            "aspect_ratio": aspect_ratio,
+            "image_size": "1K",
+        },
     )
 
     os.makedirs(os.path.dirname(output_path) or ".", exist_ok=True)

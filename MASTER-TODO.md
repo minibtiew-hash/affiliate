@@ -28,9 +28,9 @@ This is the master tracker for the project. Update status as we complete each st
 3. ~~Decide if we need a consistent "creator persona" across videos or vary per product~~ — done: varies per product, but must stay consistent within each individual video's 4 images
 4. ~~Scaffold the pipeline codebase~~ — done: `generate_image()`, `generate_video()`, ffmpeg helpers (`trim_clip`, `zoom_pan_clip`, `stitch_clips`), and `generate_video_from_product()` orchestrator all written (untested against live APIs). See `pipeline/` below.
 5. `GEMINI_API_KEY` set locally (`.env`, gitignored) — confirmed **valid and working**: `scripts/test_generate_image.py` authenticated successfully and reached the live API. Currently blocked on **quota**, not auth: `429 RateLimitError — "You do not have enough quota to make this request."` Needs billing/quota enabled on the Google AI Studio / Cloud project this key belongs to before a real image can be generated. `KLING_API_KEY` still needed too.
-6. ~~Draft the 4 beat prompts for the validation test product~~ — done, see `products/fingerbot.py`
-7. **Blocked on Gemini quota** — re-run `scripts/test_generate_image.py` once quota is restored, to generate the first real test image and validate visually
-8. Once all 4 test images look right, run a first test Kling clip via `scripts/test_generate_video.py` to validate the animation step — note this needs the generated image hosted at a reachable URL first (Kling doesn't accept local file paths)
+6. ~~Draft the 4 beat prompts for the validation test product~~ — done, see `products/alpha_borong_switch.py`
+7. ~~Generate + validate all 4 test images~~ — done. Also caught and fixed two real bugs along the way: (a) aspect ratio wasn't actually being sent to the API (fixed — see Known Gaps below), (b) beats 1-3 prompts contradicted themselves ("night" + "natural window lighting") producing bright daytime renders instead of the intended nighttime scenario — fixed by switching to consistent warm-lamp lighting. Also corrected product identity: the real Shopee listing is "Alpha Borong" branded, not the placeholder "ADAPROX Fingerbot" from the original brief — config renamed, beat 4 packaging text corrected.
+8. Run a first test Kling clip via `scripts/test_generate_video.py` to validate the animation step — note this needs the generated image hosted at a reachable URL first (Kling doesn't accept local file paths); still blocked on `KLING_API_KEY`
 9. Run one full end-to-end test via `generate_video_from_product()` on the validation test product
 10. Start tagging more bad/good examples as they come in, using the scoring checklist from the requirements guide
 11. Once the single-product pipeline is validated end-to-end, design the product-config data model / batch queue for scaling to many products (component #6 territory) — per-product creative prompts should live in that system (or per-product files), not in this tracker
@@ -53,7 +53,7 @@ This is the master tracker for the project. Update status as we complete each st
 
 1. `image-generation-animation-requirements.md` — 4-photo generation briefs + animation briefs per beat + final video evaluation checklist (single source of truth, replaces the earlier standalone video requirements guide)
 2. `pipeline/` — pipeline codebase: `config.py` (env/API key loading), `image_gen.py` (Nano Banana 2 wrapper), `video_gen.py` (Kling submit + poll wrapper), `ffmpeg_utils.py` (trim/zoom-pan/stitch), `orchestrator.py` (`generate_video_from_product`, wires all beats together), `cost_tracker.py` (logs every image/video API call with estimated cost + running total — see Cost Tracking section below)
-3. `products/fingerbot.py` — single validation test product config, all 4 beat prompts drafted (used to prove the pipeline works end-to-end before scaling to real products; per-product creative content lives here, not in this tracker)
+3. `products/alpha_borong_switch.py` — single validation test product config, all 4 beat prompts drafted (used to prove the pipeline works end-to-end before scaling to real products; per-product creative content lives here, not in this tracker)
 4. `scripts/test_generate_image.py`, `scripts/test_generate_video.py` — standalone test entry points, not yet run (no API keys set in this environment)
 5. `requirements.txt`, `.env.example` — dependency list + required env vars (`GEMINI_API_KEY`, `KLING_API_KEY`)
 
@@ -64,10 +64,10 @@ This is the master tracker for the project. Update status as we complete each st
 - **Image cost (Nano Banana 2):** defaulted to $0.05/image (midpoint of the brief's $0.045-$0.055 estimate). Override with `GEMINI_IMAGE_COST_USD` in `.env` once real billing data is available.
 - **Video cost (Kling):** **unset by default** — the brief gives no sticker price, only a "budget ~1.4x for rerolls" note. Cost will log as `unknown` until `KLING_COST_PER_SECOND_USD` is set in `.env` from your actual Kling billing page. Don't trust a guessed number here.
 - Kling cost is logged at job submission (not completion) since failed/rerolled jobs can still burn credits per the brief.
-- Running total so far: **$0.05** (1 test image generated — Fingerbot beat 2, 2026-07-09)
+- Running total so far: **$0.50** (10 test images generated, 2026-07-09 — includes debugging/regeneration overhead while fixing the aspect-ratio and lighting bugs, not just the final 4-image set)
 
 ### Known gaps / unverified assumptions in the current code (flag before relying on it)
-- `image_gen.py` follows the brief's documented `client.interactions.create` SDK call verbatim — not yet confirmed against a live response, and the exact `aspect_ratio` parameter placement is still a guess (marked TODO in code)
+- ~~`aspect_ratio` parameter placement was a guess~~ — **fixed 2026-07-09**: `generation_config.image_config.aspect_ratio` is deprecated in the installed SDK; the working path is `response_format={"type": "image", "aspect_ratio": ..., "image_size": "1K"}`, passed directly to `client.interactions.create()`. Confirmed live: reference-based generations were drifting to a different resolution (848x1264 vs 768x1376) before this fix, now consistent across all 4 beats.
 - `video_gen.py` assumes a simple `Authorization: Bearer <token>` auth scheme per the brief; some Kling accounts use JWT-based auth instead — verify against your actual account's docs
 - `orchestrator.py`'s beat 2/3 flow calls `trim_clip` directly on the Kling result URL — a download-to-local-file step is still needed before trimming works (noted as a TODO in the code); also Kling's `image` field needs a hosted URL, not a local path, so generated PNGs need an upload step before being sent to Kling
 

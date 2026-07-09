@@ -14,8 +14,16 @@ concept from the original draft (still accurate to the real product) but
 beat 4's packaging text has been corrected from the placeholder brand to
 Alpha Borong, and now includes the remote control since that's a real
 differentiator for this listing. Same bedroom, same white light switch,
-same left-side window light, same light-medium skin tone across all 4 for
-consistency per image-generation-animation-requirements.md.
+same left-side warm lamp light, same light-medium skin tone across all 4
+for consistency per image-generation-animation-requirements.md.
+
+Lighting note (fixed 2026-07-09): the scenario is nighttime — too tired to
+get up and turn off the light — so beats 1-3 are lit by a warm bedside lamp
+glow, not daylight/window light. An earlier draft said "night" but also
+said "natural window lighting," which contradicted itself and produced
+bright morning-looking renders. Beat 4 is intentionally brighter per the
+CTA spec (never end dark), narratively justified as the lamp now being
+fully switched on.
 """
 
 BEAT1_PROMPT = (
@@ -28,16 +36,19 @@ BEAT1_PROMPT = (
     "softly lit; the upper two-thirds of the vertical frame is left open "
     "and uncluttered for a hook text overlay. Same bedroom as the rest of "
     "this set: a plain wall with a plain white switch plate, softly "
-    "blurred where out of focus. Natural window lighting from the left "
-    "casting soft, warm shadows, no harsh studio lighting. Skin tone: "
-    "light-medium, matching hand. Phone-camera aesthetic, slightly grainy "
-    "and candid, not polished. No face visible."
+    "blurred where out of focus. It is genuinely nighttime — the room is "
+    "dim and dark, lit only by a warm, soft lamp glow coming from the left "
+    "side of frame (a bedside lamp just out of shot), casting warm shadows. "
+    "No daylight, no window light, no sunlight anywhere in the shot. Skin "
+    "tone: light-medium, matching hand. Phone-camera aesthetic, slightly "
+    "grainy and candid, not polished. No face visible."
 )
 
 BEAT1_NEGATIVE_PROMPT = (
     "studio lighting, white seamless background, multiple hands, blurry "
     "hand, text, watermark, logo overlay, harsh shadows, low resolution, "
-    "staged or posed look"
+    "staged or posed look, daylight, sunlight, bright window light, "
+    "morning light, daytime"
 )
 
 BEAT2_PROMPT = (
@@ -48,8 +59,11 @@ BEAT2_PROMPT = (
     "around the sides, thumb visible, product tilted slightly toward camera "
     "so its full shape and the mechanical arm are clearly visible. "
     "Background is a softly blurred bedroom wall with a white light switch "
-    "faintly visible out of focus. Natural window lighting from the left, "
-    "soft shadows, no harsh studio lighting. Product is in sharp focus, "
+    "faintly visible out of focus. It is nighttime, same dim room as the "
+    "rest of this set, lit only by a warm lamp glow from the left (same "
+    "bedside lamp) — no daylight or window light — but the product itself "
+    "is clearly and evenly lit despite the dim ambient room, soft warm "
+    "shadows, no harsh studio lighting. Product is in sharp focus, "
     "occupying roughly 40% of the vertical frame, positioned center-right. "
     "Shot vertically, phone-camera aesthetic, slightly candid angle — not a "
     "polished studio product shot. Skin tone: light-medium. No visible face, "
@@ -59,7 +73,8 @@ BEAT2_PROMPT = (
 BEAT2_NEGATIVE_PROMPT = (
     "studio lighting, white seamless background, multiple hands, blurry "
     "product, motion blur, text, watermark, logo overlay, dark shadows, low "
-    "resolution"
+    "resolution, daylight, sunlight, bright window light, morning light, "
+    "daytime"
 )
 
 BEAT3_PROMPT = (
@@ -70,18 +85,21 @@ BEAT3_PROMPT = (
     "the exact moment of activation. A sliver of the same softly blurred "
     "bedroom wall is visible around the switch. In the background, subtly "
     "out of focus, a bedside lamp is visibly lit, making the "
-    "cause-and-effect obvious even as a still frame. Natural window "
-    "lighting from the left, same direction and softness as the rest of "
-    "this set, soft shadows, no harsh studio lighting. Product and switch "
-    "in sharp focus, mechanical arm clearly mid-motion. Shot vertically, "
-    "phone-camera aesthetic, slightly candid angle. No hand or face in "
-    "frame — device caught mid-action on its own."
+    "cause-and-effect obvious even as a still frame — this bedside lamp is "
+    "the very light being controlled. It is nighttime, same dim room as "
+    "the rest of this set, lit only by that same warm lamp glow from the "
+    "left, no daylight or window light anywhere, soft warm shadows, no "
+    "harsh studio lighting. Product and switch in sharp focus, mechanical "
+    "arm clearly mid-motion. Shot vertically, phone-camera aesthetic, "
+    "slightly candid angle. No hand or face in frame — device caught "
+    "mid-action on its own."
 )
 
 BEAT3_NEGATIVE_PROMPT = (
     "studio lighting, white seamless background, hand in frame, blurry "
     "action, motion blur obscuring the arm, text, watermark, logo overlay, "
-    "dark shadows, low resolution, static or idle-looking device"
+    "dark shadows, low resolution, static or idle-looking device, daylight, "
+    "sunlight, bright window light, morning light, daytime"
 )
 
 BEAT4_PROMPT = (
@@ -94,11 +112,14 @@ BEAT4_PROMPT = (
     "arranged neatly, product occupying the upper two-thirds of frame, "
     "centered. The bottom third of the vertical frame is left clear, "
     "evenly lit and uncluttered, reserved for bold price/offer text "
-    "overlay. Lighting is bright and even — natural window light from the "
-    "left, same direction as the rest of the set, but brighter and more "
-    "evenly diffused than the earlier candid shots, giving a more "
-    'polished "product shot" credibility to this final frame. No dark '
-    "corners, no shadows obscuring the product, remote, or box. Shot "
+    "overlay. Still nighttime, same bedroom as the rest of the set, but the "
+    "bedside lamp from the earlier shots is now fully switched on and "
+    "positioned to the left, brightly and evenly illuminating the whole "
+    "scene — no daylight or window light, just the lamp now at full "
+    "brightness, warmer and more evenly diffused than the dim earlier "
+    'shots, giving a more polished "product shot" credibility to this '
+    "final frame. No dark corners, no shadows obscuring the product, "
+    "remote, or box. Shot "
     "vertically, phone-camera aesthetic but cleaner and more deliberate "
     "than the hook shot. No hand or face needed in this shot — product, "
     "remote, and packaging only."
