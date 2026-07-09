@@ -37,14 +37,23 @@ def _animate_beat(beat_num: str, beat_cfg: dict, image_path: str, out_dir: str, 
             output_path=os.path.join(out_dir, f"clip{beat_num}_raw.mp4"),
         )
 
+    # Normalize to the common target resolution BEFORE burning in text — text
+    # positioned on a raw clip (e.g. Kling's 716x1284) and normalized/cropped
+    # afterward can get clipped at the edges, since Kling's aspect ratio
+    # doesn't exactly match the 1080x1920 target. Normalizing first means
+    # text is always positioned on the final frame, with nothing left to crop.
+    normalized = ffmpeg_utils.normalize_clip(
+        clip, os.path.join(out_dir, f"clip{beat_num}_normalized.mp4")
+    )
+
     if beat_cfg.get("overlay_text"):
         return ffmpeg_utils.add_text_overlay(
-            input_path=clip,
+            input_path=normalized,
             text=beat_cfg["overlay_text"],
             zone=beat_cfg.get("overlay_zone", "center"),
             output_path=os.path.join(out_dir, f"clip{beat_num}.mp4"),
         )
-    return clip
+    return normalized
 
 
 def generate_video_from_product(product_config: dict) -> str:
