@@ -28,11 +28,12 @@ This is the master tracker for the project. Update status as we complete each st
 3. ~~Decide if we need a consistent "creator persona" across videos or vary per product~~ — done: varies per product, but must stay consistent within each individual video's 4 images
 4. ~~Scaffold the pipeline codebase~~ — done: `generate_image()`, `generate_video()`, ffmpeg helpers (`trim_clip`, `zoom_pan_clip`, `stitch_clips`), and `generate_video_from_product()` orchestrator all written (untested against live APIs). See `pipeline/` below.
 5. `GEMINI_API_KEY` set locally (`.env`, gitignored) — confirmed **valid and working**: `scripts/test_generate_image.py` authenticated successfully and reached the live API. Currently blocked on **quota**, not auth: `429 RateLimitError — "You do not have enough quota to make this request."` Needs billing/quota enabled on the Google AI Studio / Cloud project this key belongs to before a real image can be generated. `KLING_API_KEY` still needed too.
-6. ~~Draft the 3 remaining Fingerbot prompts~~ — done: all 4 beats now written in `products/fingerbot.py` (beat 2 from the brief verbatim; beats 1/3/4 written to match its bedroom/lighting/skin-tone details for cross-beat consistency)
-7. **Blocked on Gemini quota** — re-run `scripts/test_generate_image.py` once quota is restored, to generate the first real test image (Fingerbot beat 2), validate visually
-8. Once all 4 test images look right, run a first test Kling clip (beat 2 or 3) via `scripts/test_generate_video.py` to validate the animation step — note this needs the generated image hosted at a reachable URL first (Kling doesn't accept local file paths)
-9. Run one full end-to-end test via `generate_video_from_product()` on the Fingerbot case
+6. ~~Draft the 4 beat prompts for the validation test product~~ — done, see `products/fingerbot.py`
+7. **Blocked on Gemini quota** — re-run `scripts/test_generate_image.py` once quota is restored, to generate the first real test image and validate visually
+8. Once all 4 test images look right, run a first test Kling clip via `scripts/test_generate_video.py` to validate the animation step — note this needs the generated image hosted at a reachable URL first (Kling doesn't accept local file paths)
+9. Run one full end-to-end test via `generate_video_from_product()` on the validation test product
 10. Start tagging more bad/good examples as they come in, using the scoring checklist from the requirements guide
+11. Once the single-product pipeline is validated end-to-end, design the product-config data model / batch queue for scaling to many products (component #6 territory) — per-product creative prompts should live in that system (or per-product files), not in this tracker
 
 ---
 
@@ -52,7 +53,7 @@ This is the master tracker for the project. Update status as we complete each st
 
 1. `image-generation-animation-requirements.md` — 4-photo generation briefs + animation briefs per beat + final video evaluation checklist (single source of truth, replaces the earlier standalone video requirements guide)
 2. `pipeline/` — pipeline codebase: `config.py` (env/API key loading), `image_gen.py` (Nano Banana 2 wrapper), `video_gen.py` (Kling submit + poll wrapper), `ffmpeg_utils.py` (trim/zoom-pan/stitch), `orchestrator.py` (`generate_video_from_product`, wires all beats together)
-3. `products/fingerbot.py` — test product config; all 4 beat prompts drafted (beat 2 verbatim from the brief, beats 1/3/4 written to match its bedroom/lighting/skin-tone for consistency)
+3. `products/fingerbot.py` — single validation test product config, all 4 beat prompts drafted (used to prove the pipeline works end-to-end before scaling to real products; per-product creative content lives here, not in this tracker)
 4. `scripts/test_generate_image.py`, `scripts/test_generate_video.py` — standalone test entry points, not yet run (no API keys set in this environment)
 5. `requirements.txt`, `.env.example` — dependency list + required env vars (`GEMINI_API_KEY`, `KLING_API_KEY`)
 
