@@ -2,7 +2,7 @@ import time
 
 import requests
 
-from pipeline import config
+from pipeline import config, cost_tracker
 
 TERMINAL_STATUSES = {"succeed", "completed", "failed"}
 
@@ -49,6 +49,11 @@ def generate_video(
     )
     submit.raise_for_status()
     task_id = submit.json()["data"]["task_id"]
+
+    # Kling bills per second of generated output as soon as a job is
+    # accepted — even failed/rerolled jobs can still consume credits (per
+    # the brief's ~1.4x budgeting note) — so log cost here, not on success.
+    cost_tracker.log_video_call(model=body["model_name"], seconds=float(duration))
 
     deadline = time.time() + timeout
     while time.time() < deadline:

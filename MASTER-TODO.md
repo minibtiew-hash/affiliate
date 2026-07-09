@@ -52,10 +52,19 @@ This is the master tracker for the project. Update status as we complete each st
 ## Files Produced So Far
 
 1. `image-generation-animation-requirements.md` — 4-photo generation briefs + animation briefs per beat + final video evaluation checklist (single source of truth, replaces the earlier standalone video requirements guide)
-2. `pipeline/` — pipeline codebase: `config.py` (env/API key loading), `image_gen.py` (Nano Banana 2 wrapper), `video_gen.py` (Kling submit + poll wrapper), `ffmpeg_utils.py` (trim/zoom-pan/stitch), `orchestrator.py` (`generate_video_from_product`, wires all beats together)
+2. `pipeline/` — pipeline codebase: `config.py` (env/API key loading), `image_gen.py` (Nano Banana 2 wrapper), `video_gen.py` (Kling submit + poll wrapper), `ffmpeg_utils.py` (trim/zoom-pan/stitch), `orchestrator.py` (`generate_video_from_product`, wires all beats together), `cost_tracker.py` (logs every image/video API call with estimated cost + running total — see Cost Tracking section below)
 3. `products/fingerbot.py` — single validation test product config, all 4 beat prompts drafted (used to prove the pipeline works end-to-end before scaling to real products; per-product creative content lives here, not in this tracker)
 4. `scripts/test_generate_image.py`, `scripts/test_generate_video.py` — standalone test entry points, not yet run (no API keys set in this environment)
 5. `requirements.txt`, `.env.example` — dependency list + required env vars (`GEMINI_API_KEY`, `KLING_API_KEY`)
+
+## Cost Tracking
+
+`pipeline/cost_tracker.py` logs every image/video API call to `costs/usage_log.jsonl` (local, gitignored) and prints cost + running total to console on each call.
+
+- **Image cost (Nano Banana 2):** defaulted to $0.05/image (midpoint of the brief's $0.045-$0.055 estimate). Override with `GEMINI_IMAGE_COST_USD` in `.env` once real billing data is available.
+- **Video cost (Kling):** **unset by default** — the brief gives no sticker price, only a "budget ~1.4x for rerolls" note. Cost will log as `unknown` until `KLING_COST_PER_SECOND_USD` is set in `.env` from your actual Kling billing page. Don't trust a guessed number here.
+- Kling cost is logged at job submission (not completion) since failed/rerolled jobs can still burn credits per the brief.
+- Running total so far: **$0.05** (1 test image generated — Fingerbot beat 2, 2026-07-09)
 
 ### Known gaps / unverified assumptions in the current code (flag before relying on it)
 - `image_gen.py` follows the brief's documented `client.interactions.create` SDK call verbatim — not yet confirmed against a live response, and the exact `aspect_ratio` parameter placement is still a guess (marked TODO in code)

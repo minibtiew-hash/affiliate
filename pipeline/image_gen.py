@@ -3,7 +3,7 @@ import os
 
 from google import genai
 
-from pipeline import config
+from pipeline import config, cost_tracker
 
 
 def generate_image(
@@ -47,5 +47,7 @@ def generate_image(
     os.makedirs(os.path.dirname(output_path) or ".", exist_ok=True)
     with open(output_path, "wb") as f:
         f.write(base64.b64decode(interaction.output_image.data))
+
+    cost_tracker.log_image_call(model=config.GEMINI_MODEL)
 
     return output_path
