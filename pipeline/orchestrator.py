@@ -19,6 +19,7 @@ def _animate_beat(beat_num: str, beat_cfg: dict, image_path: str, out_dir: str, 
             prompt=beat_cfg["kling_prompt"],
             negative_prompt=beat_cfg.get("kling_negative_prompt", ""),
             camera_params=beat_cfg.get("camera_params"),
+            mode=beat_cfg.get("kling_mode", "pro"),
         )
         raw_local = storage.download_file(
             raw_url, os.path.join(out_dir, f"beat{beat_num}_raw_5s.mp4")
