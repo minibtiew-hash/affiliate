@@ -37,18 +37,25 @@ def get_duration(path: str) -> float:
 
 
 def trim_clip(input_path: str, start: float, duration: float, output_path: str) -> str:
+    # Input-side seek (-ss before -i) + re-encode, not "-c copy" — stream
+    # copy on Kling's encoded output produced empty files ("Output file is
+    # empty, nothing was encoded"), confirmed live 2026-07-10. Re-encoding
+    # is slightly slower but reliable regardless of source keyframe layout.
     subprocess.run(
         [
             "ffmpeg",
             "-y",
-            "-i",
-            input_path,
             "-ss",
             str(start),
+            "-i",
+            input_path,
             "-t",
             str(duration),
-            "-c",
-            "copy",
+            "-c:v",
+            "libx264",
+            "-pix_fmt",
+            "yuv420p",
+            "-an",
             output_path,
         ],
         check=True,
