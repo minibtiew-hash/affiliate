@@ -77,29 +77,35 @@ BEAT2_NEGATIVE_PROMPT = (
     "daytime"
 )
 
+# Beat 3 rewritten 2026-07-10 after the first end-to-end video: the original
+# "device pressing the switch on its own, light changing state" demo read as
+# unrealistic/CGI. Root causes and the universal fixes now documented in
+# image-generation-animation-requirements.md ("Demo beat realism principles"):
+# show the human trigger in-frame, never ask the video model for a scene
+# state change, and explicitly anchor what stays still.
 BEAT3_PROMPT = (
-    "A close-up UGC-style vertical photo, tighter framing than a standard "
-    "product shot, showing the white wireless switch-pusher device mounted "
-    "directly on top of a wall light switch, its small mechanical arm "
-    "extended downward mid-press, physically pushing the switch toggle at "
-    "the exact moment of activation. A sliver of the same softly blurred "
-    "bedroom wall is visible around the switch. In the background, subtly "
-    "out of focus, a bedside lamp is visibly lit, making the "
-    "cause-and-effect obvious even as a still frame — this bedside lamp is "
-    "the very light being controlled. It is nighttime, same dim room as "
-    "the rest of this set, lit only by that same warm lamp glow from the "
-    "left, no daylight or window light anywhere, soft warm shadows, no "
-    "harsh studio lighting. Product and switch in sharp focus, mechanical "
-    "arm clearly mid-motion. Shot vertically, phone-camera aesthetic, "
-    "slightly candid angle. No hand or face in frame — device caught "
-    "mid-action on its own."
+    "A UGC-style vertical photo shot like a phone propped on a nightstand: "
+    "in the near foreground, slightly low in frame, a hand holds the small "
+    "gray remote control with the thumb resting on its ON/OFF button, "
+    "remote angled toward the wall. In the mid-ground, in sharp focus, the "
+    "white wireless switch-pusher device is mounted on top of the wall "
+    "light switch, its small mechanical arm resting just above the switch "
+    "toggle, poised to press. Both the remote in the hand and the device "
+    "on the switch are clearly visible in the same frame, so the "
+    "cause-and-effect relationship is obvious at a glance. The bedside "
+    "lamp is already on, giving the same warm glow from the left as the "
+    "rest of this set — it is nighttime, dim room, no daylight or window "
+    "light anywhere, soft warm shadows, no harsh studio lighting. Same "
+    "hand, same skin tone (light-medium), same bedroom and white switch "
+    "plate as the other shots in this set. Phone-camera aesthetic, candid "
+    "framing, very slightly imperfect angle. No face visible."
 )
 
 BEAT3_NEGATIVE_PROMPT = (
-    "studio lighting, white seamless background, hand in frame, blurry "
-    "action, motion blur obscuring the arm, text, watermark, logo overlay, "
-    "dark shadows, low resolution, static or idle-looking device, daylight, "
-    "sunlight, bright window light, morning light, daytime"
+    "studio lighting, white seamless background, multiple hands, extra "
+    "fingers, blurry product, text, watermark, logo overlay, dark shadows, "
+    "low resolution, daylight, sunlight, bright window light, morning "
+    "light, daytime, floating device, device detached from wall"
 )
 
 BEAT4_PROMPT = (
@@ -176,12 +182,18 @@ PRODUCT_CONFIG = {
             "prompt": BEAT3_PROMPT,
             "negative_prompt": BEAT3_NEGATIVE_PROMPT,
             "kling_prompt": (
-                "The mechanical arm presses down firmly on the switch, "
-                "completing the press, light state visibly changes at the "
-                "moment of contact"
+                "The thumb presses the remote button once with a small, "
+                "natural click motion, and a moment later the small "
+                "mechanical arm on the wall device pushes down on the light "
+                "switch with one short, firm, mechanical movement. Nothing "
+                "else in the scene moves: the camera stays completely "
+                "static, the lamp stays on, the lighting does not change, "
+                "the hand stays in place apart from the thumb press."
             ),
             "kling_negative_prompt": (
-                "fast zoom, spin, camera shake, motion blur, jump cut"
+                "camera movement, zoom, pan, spin, camera shake, motion "
+                "blur, jump cut, lighting change, light flicker, morphing, "
+                "warping, object deformation, extra fingers, hand distortion"
             ),
             "camera_params": {},
             "trim_start": 0,

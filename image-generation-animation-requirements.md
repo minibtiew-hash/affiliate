@@ -85,6 +85,18 @@ Each image is generated to already be "animation-ready" — meaning it's compose
 - Duration: 2.5–3 seconds (longest clip — this beat carries the most weight)
 - Avoid: cutting before the action completes
 
+### ⚠️ Demo beat realism principles (added 2026-07-10 — apply to EVERY product's beat 3)
+
+The first end-to-end video's demo beat read as unrealistic/CGI. Diagnosis on the real output, generalized so every future product's demo prompt follows these rules:
+
+1. **Show the human trigger in-frame.** An action with no visible cause (a device operating "by itself") reads as fake. Compose the still so cause and effect are both visible in one frame — the finger on the button/remote in the foreground, the product acting in the mid-ground. The viewer must see *who* initiated the action.
+2. **Never ask the video model for a scene state change.** "Light turns on," "liquid appears," "color changes" are where AI video morphs and warps worst. Set the scene state in the *still image* (lamp already on) and animate only physical motion. If a before→after state is truly essential, use Kling's `image_tail` (explicit end frame) rather than describing the change in the prompt text.
+3. **Animate ONE small, mechanical motion — and explicitly anchor everything else.** Say exactly what moves ("the thumb presses the button once," "the arm pushes down with one short movement") *and* explicitly state that everything else stays still: camera static, lighting unchanged, hand in place. Unanchored prompts make Kling drift everything slightly, which reads as dreamlike, not real.
+4. **Lock the camera for demo beats.** A propped-phone, completely static camera is the UGC realism baseline — camera motion stacked on object motion compounds artifacts. Put "camera movement, zoom, pan" in the negative prompt.
+5. **Negative-prompt the classic AI tells**: morphing, warping, object deformation, extra fingers, hand distortion, light flicker.
+
+Reference implementation: `products/alpha_borong_switch.py` beat 3 (revised 2026-07-10).
+
 ---
 
 ## Photo 4: CTA Close Shot
