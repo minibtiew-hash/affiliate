@@ -2,19 +2,34 @@ import json
 import os
 import subprocess
 import tempfile
+import textwrap
 
 TARGET_SIZE = "1080x1920"
 TARGET_FPS = 25
 
-FONT_PATH = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
+# Poppins ExtraBold (OFL) — the standard social-caption look. The earlier
+# DejaVu Sans default read as "AI-generated" per user feedback 2026-07-13.
+FONT_PATH = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    "assets", "fonts", "Poppins-ExtraBold.ttf",
+)
 
-# zone -> (y expression as fraction of frame height, font size)
+# zone -> (y as fraction of frame height, font size). Values keep text inside
+# the 9:16 MOBILE-SAFE area: platform UI (Shopee/TikTok) covers roughly the
+# top ~8%, the bottom ~22% (captions/buttons/progress bar), and the right
+# ~15% (action buttons) — text must never sit in those bands.
 TEXT_ZONES = {
-    "upper_third": (0.12, 64),
-    "center": (0.45, 64),
-    "lower_third_light": (0.78, 48),
-    "lower_third_bold": (0.82, 64),
+    "upper_third": (0.16, 60),
+    "center": (0.42, 60),
+    "lower_third_light": (0.64, 46),
+    "lower_third_bold": (0.68, 60),
 }
+
+# Max text width as a fraction of frame width before wrapping onto a new
+# line — keeps text clear of the right-side action buttons and screen edges.
+TEXT_SAFE_WIDTH_FRAC = 0.80
+# Rough average glyph width for Poppins ExtraBold, as a fraction of fontsize.
+_AVG_CHAR_WIDTH_EM = 0.60
 
 
 def get_duration(path: str) -> float:
@@ -133,10 +148,22 @@ def normalize_clip(
     return output_path
 
 
+def _wrap_for_width(text: str, font_size: int, frame_width: int) -> str:
+    """Wrap text so no line exceeds the mobile-safe width — ffmpeg's drawtext
+    does NOT wrap on its own, so an unwrapped long line silently runs off
+    both frame edges (this happened live: the beat 1 hook line was ~1600px
+    wide on a 1080px frame).
+    """
+    max_line_px = frame_width * TEXT_SAFE_WIDTH_FRAC
+    chars_per_line = max(8, int(max_line_px / (font_size * _AVG_CHAR_WIDTH_EM)))
+    return "\n".join(textwrap.wrap(text, width=chars_per_line))
+
+
 def add_text_overlay(
     input_path: str, text: str, zone: str, output_path: str, font_color: str = "white"
 ) -> str:
-    """Burn in a single line of static text at a fixed screen zone.
+    """Burn in static caption text at a fixed mobile-safe screen zone,
+    auto-wrapping onto multiple lines to stay inside the safe width.
 
     zone: one of TEXT_ZONES ("upper_third", "center", "lower_third_light",
     "lower_third_bold").
@@ -145,34 +172,47 @@ def add_text_overlay(
         raise ValueError(f"zone must be one of {list(TEXT_ZONES)}, got {zone!r}")
     y_frac, font_size = TEXT_ZONES[zone]
 
-    escaped_text = text.replace("\\", "\\\\").replace(":", "\\:").replace("'", "\\'")
+    frame_width = int(TARGET_SIZE.split("x")[0])
+    wrapped = _wrap_for_width(text, font_size, frame_width)
+
+    # textfile= instead of text= — inline filter escaping silently ate
+    # apostrophes ("Don't" rendered as "Dont", caught live 2026-07-14).
+    with tempfile.NamedTemporaryFile(
+        mode="w", suffix=".txt", delete=False
+    ) as text_file:
+        text_file.write(wrapped)
+        text_file_path = text_file.name
 
     drawtext = (
-        f"drawtext=fontfile={FONT_PATH}:text='{escaped_text}':"
+        f"drawtext=fontfile={FONT_PATH}:textfile={text_file_path}:"
         f"fontsize={font_size}:fontcolor={font_color}:"
-        f"borderw=3:bordercolor=black:"
+        f"borderw=4:bordercolor=black@0.9:"
+        f"line_spacing=12:"
         f"x=(w-text_w)/2:y=h*{y_frac}"
     )
 
-    subprocess.run(
-        [
-            "ffmpeg",
-            "-y",
-            "-i",
-            input_path,
-            "-vf",
-            drawtext,
-            "-c:v",
-            "libx264",
-            "-pix_fmt",
-            "yuv420p",
-            "-c:a",
-            "copy",
-            output_path,
-        ],
-        check=True,
-        capture_output=True,
-    )
+    try:
+        subprocess.run(
+            [
+                "ffmpeg",
+                "-y",
+                "-i",
+                input_path,
+                "-vf",
+                drawtext,
+                "-c:v",
+                "libx264",
+                "-pix_fmt",
+                "yuv420p",
+                "-c:a",
+                "copy",
+                output_path,
+            ],
+            check=True,
+            capture_output=True,
+        )
+    finally:
+        os.remove(text_file_path)
     return output_path
 
 

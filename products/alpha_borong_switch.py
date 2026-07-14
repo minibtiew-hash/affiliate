@@ -175,7 +175,9 @@ PRODUCT_CONFIG = {
             "negative_prompt": BEAT2_NEGATIVE_PROMPT,
             "duration": 1.0,
             "zoom_direction": "in",
-            "overlay_text": "Alpha Borong Wireless Switch",
+            # "Now introducing..." framing per user 2026-07-13 — signals to
+            # the viewer that THIS is the product being sold, not just a scene.
+            "overlay_text": "Now introducing: the wireless switch clicker",
             "overlay_zone": "lower_third_light",
         },
         "3": {

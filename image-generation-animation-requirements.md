@@ -132,9 +132,18 @@ Reference implementation: `products/alpha_borong_switch.py` beat 3 (revised 2026
 | Image | Reserved text zone | Content that goes there |
 |---|---|---|
 | 1. Hook | Upper-third or center | Hook line ("POV: ...") |
-| 2. Product Reveal | Lower-third (light) | Optional product name label |
+| 2. Product Reveal | Lower-third (light) | "Now introducing..." + product name — must explicitly signal to the viewer that THIS is the product being sold, not just name it |
 | 3. Proof/Demo | None ideally | Let the action speak — text here competes with proof |
 | 4. CTA Close | Lower-third (bold) | Price, offer, "Shop now" cue |
+
+### ⚠️ Text overlay rules for 9:16 mobile (added 2026-07-14 — apply to EVERY video)
+
+Found live: caption text was running off the frame edges and sitting under platform UI. These rules are implemented in `pipeline/ffmpeg_utils.py` and apply universally:
+
+1. **Respect the mobile UI safe area.** Shopee/TikTok-style players cover roughly the **top ~8%** (status/search bar), **bottom ~22%** (caption, buttons, progress bar), and **right ~15%** (like/share/cart action rail). No burned-in text may sit in those bands. Current safe zone anchors: upper text at y≈0.16, lower text at y≈0.64–0.68 — never lower.
+2. **Always wrap text — never render one long line.** ffmpeg's `drawtext` does not wrap on its own; an unwrapped hook line rendered ~1600px wide on a 1080px frame. Max line width is ~80% of frame width, auto-wrapped onto multiple lines (`_wrap_for_width`).
+3. **Use a real social-caption font, never a default system font.** Default fonts (DejaVu etc.) read as "AI-generated." Standard is **Poppins ExtraBold** (`assets/fonts/`, OFL-licensed for commercial use) with a thick dark border — the native TikTok/Shopee caption look.
+4. **Verify with a frame extract, not just a successful render.** Pull a frame (`ffmpeg -ss ... -frames:v 1`) and check text position/wrapping/glyphs before shipping — escaping bugs (e.g. a swallowed apostrophe) and clipping don't fail the render, they just look wrong.
 
 ---
 
