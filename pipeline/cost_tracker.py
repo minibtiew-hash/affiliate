@@ -17,15 +17,17 @@ GEMINI_IMAGE_COST_USD = float(os.environ.get("GEMINI_IMAGE_COST_USD", "0.05"))
 # (kling-v2-6): pro mode $0.07/s, std mode $0.042/s. Rate depends on which
 # mode a given call actually used, not just the model — cost is unknown
 # until the matching env var is set, rather than silently guessing.
-_kling_pro_env = os.environ.get("KLING_COST_PER_SECOND_USD_PRO")
-KLING_COST_PER_SECOND_USD_PRO = float(_kling_pro_env) if _kling_pro_env else None
+def _env_rate(name: str) -> float | None:
+    value = os.environ.get(name)
+    return float(value) if value else None
 
-_kling_std_env = os.environ.get("KLING_COST_PER_SECOND_USD_STD")
-KLING_COST_PER_SECOND_USD_STD = float(_kling_std_env) if _kling_std_env else None
 
-_KLING_RATES_BY_MODE = {
-    "pro": KLING_COST_PER_SECOND_USD_PRO,
-    "std": KLING_COST_PER_SECOND_USD_STD,
+# Rate depends on mode AND whether native audio is on (audio is pro-only per
+# the official pricing table; std+audio has no published rate).
+_KLING_RATES = {
+    ("pro", "off"): _env_rate("KLING_COST_PER_SECOND_USD_PRO"),
+    ("std", "off"): _env_rate("KLING_COST_PER_SECOND_USD_STD"),
+    ("pro", "on"): _env_rate("KLING_COST_PER_SECOND_USD_PRO_AUDIO"),
 }
 
 
@@ -52,18 +54,20 @@ def log_image_call(model: str, count: int = 1) -> dict:
     return entry
 
 
-def log_video_call(model: str, seconds: float, mode: str = "pro") -> dict:
-    rate = _KLING_RATES_BY_MODE.get(mode)
+def log_video_call(model: str, seconds: float, mode: str = "pro", sound: str = "off") -> dict:
+    rate = _KLING_RATES.get((mode, sound))
     if rate is None:
         entry = _append(
             {
                 "type": "video",
                 "model": model,
                 "mode": mode,
+                "sound": sound,
                 "units_seconds": seconds,
                 "estimated_cost_usd": None,
-                "note": f"KLING_COST_PER_SECOND_USD_{mode.upper()} not set - "
-                "cost unknown. Set it in .env from Kling's pricing page.",
+                "note": f"No rate configured for mode={mode} sound={sound} - "
+                "cost unknown. Set the matching KLING_COST_PER_SECOND_USD_* "
+                "var in .env from Kling's pricing page.",
             }
         )
     else:
@@ -73,6 +77,7 @@ def log_video_call(model: str, seconds: float, mode: str = "pro") -> dict:
                 "type": "video",
                 "model": model,
                 "mode": mode,
+                "sound": sound,
                 "units_seconds": seconds,
                 "estimated_cost_usd": cost,
                 "cost_is_estimate": True,

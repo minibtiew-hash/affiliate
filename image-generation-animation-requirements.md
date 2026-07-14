@@ -170,6 +170,13 @@ Found live: caption text was running off the frame edges and sitting under platf
 | `mode` | `"std"` or `"pro"` — use `"pro"` for better motion quality/consistency |
 | Camera controls | Explicit params (not just prompt text): horizontal, vertical, pan, tilt, roll, zoom — each on a **-10 to 10 range**. E.g. zoom controls push-in/pull-out directly, more reliable than describing it in the prompt alone |
 
+### Audio (added 2026-07-14 — applies to every video from now on)
+
+- **Action SFX come from Kling native audio**: `"sound": "on"` on every Kling beat. Native audio is **pro-mode only** (std has no audio tier) at $0.14/s — so audio-enabled Kling beats cost $0.70 per 5s generation, $1.40/video for 2 animated beats.
+- The local pipeline carries audio end-to-end: trim keeps the source audio, normalization gives every clip a uniform AAC track (silent track added to the local zoom/pan beats so concat doesn't break on mixed stream layouts), and the stitch preserves it.
+- When trimming an audio clip, the same rule as motion applies: the kept window must contain the action's sound — don't cut mid-SFX.
+- **Background music layer is still open** (separate from SFX): candidate is Mubert (API + commercial sub-licensing); needs an account + licensing check before building.
+
 ### ⚠️ Critical workflow implication: duration mismatch
 
 Kling **cannot generate a native 1.5–3 second clip** — minimum output is 5 seconds. Our beat durations (1.5-2s, 2-2.5s, 2.5-3s, 1.5-2s) are all shorter than that. This means the actual pipeline is:

@@ -51,11 +51,33 @@ def get_duration(path: str) -> float:
     return float(json.loads(result.stdout)["format"]["duration"])
 
 
+def has_audio(path: str) -> bool:
+    result = subprocess.run(
+        [
+            "ffprobe",
+            "-v",
+            "error",
+            "-select_streams",
+            "a",
+            "-show_entries",
+            "stream=codec_type",
+            "-of",
+            "json",
+            path,
+        ],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    return bool(json.loads(result.stdout).get("streams"))
+
+
 def trim_clip(input_path: str, start: float, duration: float, output_path: str) -> str:
     # Input-side seek (-ss before -i) + re-encode, not "-c copy" — stream
     # copy on Kling's encoded output produced empty files ("Output file is
     # empty, nothing was encoded"), confirmed live 2026-07-10. Re-encoding
     # is slightly slower but reliable regardless of source keyframe layout.
+    # Audio (Kling native SFX) is carried through since 2026-07-14.
     subprocess.run(
         [
             "ffmpeg",
@@ -70,7 +92,10 @@ def trim_clip(input_path: str, start: float, duration: float, output_path: str) 
             "libx264",
             "-pix_fmt",
             "yuv420p",
-            "-an",
+            "-c:a",
+            "aac",
+            "-b:a",
+            "128k",
             output_path,
         ],
         check=True,
@@ -120,31 +145,42 @@ def zoom_pan_clip(
 def normalize_clip(
     input_path: str, output_path: str, size: str = TARGET_SIZE, fps: int = TARGET_FPS
 ) -> str:
-    """Re-encode to a common resolution/fps/pixel format so clips from
-    different sources (Kling vs zoompan) can be stream-copied together in
-    stitch_clips. Without this, mismatched resolutions (e.g. Kling's
-    716x1280-ish raw output vs zoompan's 1080x1920) break concat.
+    """Re-encode to a common resolution/fps/pixel format AND a uniform audio
+    layout so clips from different sources (Kling vs zoompan) can be
+    stream-copied together in stitch_clips. Mismatched resolutions break
+    concat, and so do mixed stream layouts (some clips with audio, some
+    without) — so clips with real audio (Kling native SFX) keep it re-encoded
+    to a standard AAC profile, and silent clips (local zoom/pan beats) get a
+    silent AAC track added.
     """
     width, height = size.split("x")
-    subprocess.run(
-        [
-            "ffmpeg",
-            "-y",
-            "-i",
-            input_path,
-            "-vf",
-            f"scale={width}:{height}:force_original_aspect_ratio=increase,"
-            f"crop={width}:{height},fps={fps}",
-            "-c:v",
-            "libx264",
-            "-pix_fmt",
-            "yuv420p",
-            "-an",
-            output_path,
-        ],
-        check=True,
-        capture_output=True,
+    vf = (
+        f"scale={width}:{height}:force_original_aspect_ratio=increase,"
+        f"crop={width}:{height},fps={fps}"
     )
+    audio_args = ["-c:a", "aac", "-ar", "44100", "-ac", "2", "-b:a", "128k"]
+
+    if has_audio(input_path):
+        cmd = [
+            "ffmpeg", "-y", "-i", input_path,
+            "-vf", vf,
+            "-c:v", "libx264", "-pix_fmt", "yuv420p",
+            *audio_args,
+            output_path,
+        ]
+    else:
+        cmd = [
+            "ffmpeg", "-y", "-i", input_path,
+            "-f", "lavfi", "-i", "anullsrc=channel_layout=stereo:sample_rate=44100",
+            "-vf", vf,
+            "-c:v", "libx264", "-pix_fmt", "yuv420p",
+            *audio_args,
+            "-map", "0:v:0", "-map", "1:a:0",
+            "-shortest",
+            output_path,
+        ]
+
+    subprocess.run(cmd, check=True, capture_output=True)
     return output_path
 
 

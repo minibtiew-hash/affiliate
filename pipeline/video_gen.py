@@ -60,7 +60,9 @@ def generate_video(
     # Kling bills per second of generated output as soon as a job is
     # accepted — even failed/rerolled jobs can still consume credits (per
     # the brief's ~1.4x budgeting note) — so log cost here, not on success.
-    cost_tracker.log_video_call(model=body["model_name"], seconds=float(duration), mode=mode)
+    cost_tracker.log_video_call(
+        model=body["model_name"], seconds=float(duration), mode=mode, sound=sound
+    )
 
     deadline = time.time() + timeout
     while time.time() < deadline:

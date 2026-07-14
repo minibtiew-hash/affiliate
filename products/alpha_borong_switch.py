@@ -166,9 +166,11 @@ PRODUCT_CONFIG = {
             "trim_duration": 3.0,
             "overlay_text": "POV: too lazy to get up and turn off the light",
             "overlay_zone": "upper_third",
-            # std mode while still validating quality/cost - switch to "pro"
-            # (or remove this key, pro is the default) once ready for final.
-            "kling_mode": "std",
+            # Native audio on for all future generations (user decision
+            # 2026-07-14). Audio is pro-only per Kling's pricing table, so
+            # this forces pro mode: $0.14/s = $0.70 per 5s clip.
+            "kling_mode": "pro",
+            "kling_sound": "on",
         },
         "2": {
             "prompt": BEAT2_PROMPT,
@@ -202,7 +204,8 @@ PRODUCT_CONFIG = {
             "trim_duration": 3.0,
             "overlay_text": "Just tap once",
             "overlay_zone": "upper_third",
-            "kling_mode": "std",
+            "kling_mode": "pro",
+            "kling_sound": "on",
         },
         "4": {
             "prompt": BEAT4_PROMPT,
